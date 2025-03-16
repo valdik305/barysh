@@ -1,0 +1,32 @@
+# Виртуальное окружение
+ venv/
+ .env/
+
+ # Кэш Python
+ __pycache__/
+ *.pyc
+ *.pyo
+
+ # Файлы IDE/редакторов
+ .vscode/
+ .idea/
+ *.sublime-workspace
+ *.sublime-project
+
+ # Логи и временные файлы
+ *.log
+ *.tmp
+ *.cache
+
+ # Тестовые данные и сгенерированные файлы
+ tests/test_data/*.jpg
+ tests/test_data/*.png
+ tests/test_data/*.pdf
+
+ output/*.pdf
+ output/*.txt
+
+ # Другие исключения (при необходимости)
+ .DS_Store    # macOS системные файлы
+ Thumbs.db    # Windows системные файлы
+
