@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREEN-API Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .section {
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        .response {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-family: monospace;
+            resize: vertical;
+            border: none;
+            background: transparent;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>GREEN-API Demo</h1>
+    <div class="container">
+        <!-- Параметры подключения -->
+        <div class="input-group">
+            <label for="idInstance">idInstance:</label>
+            <input type="text" id="idInstance" placeholder="Введите idInstance">
+        </div>
+        <div class="input-group">
+            <label for="apiTokenInstance">ApiTokenInstance:</label>
+            <input type="text" id="apiTokenInstance" placeholder="Введите ApiTokenInstance">
+        </div>
+
+        <!-- Кнопки getSettings и getStateInstance -->
+        <div>
+            <button onclick="callGetSettings()">getSettings</button>
+            <button onclick="callGetStateInstance()">getStateInstance</button>
+        </div>
+
+        <!-- Секция sendMessage -->
+        <div class="section">
+            <h3>sendMessage</h3>
+            <div class="input-group">
+                <label for="phoneMessage">Номер телефона (в формате 71234567890@c.us):</label>
+                <input type="text" id="phoneMessage" placeholder="71234567890@c.us">
+            </div>
+            <div class="input-group">
+                <label for="messageText">Текст сообщения:</label>
+                <input type="text" id="messageText" placeholder="Введите сообщение">
+            </div>
+            <button onclick="callSendMessage()">Отправить сообщение</button>
+        </div>
+
+        <!-- Секция sendFileByUrl -->
+        <div class="section">
+            <h3>sendFileByUrl</h3>
+            <div class="input-group">
+                <label for="phoneFile">Номер телефона (в формате 71234567890@c.us):</label>
+                <input type="text" id="phoneFile" placeholder="71234567890@c.us">
+            </div>
+            <div class="input-group">
+                <label for="fileUrl">URL файла:</label>
+                <input type="text" id="fileUrl" placeholder="https://example.com/file.pdf">
+            </div>
+            <div class="input-group">
+                <label for="fileName">Имя файла (с расширением):</label>
+                <input type="text" id="fileName" placeholder="file.pdf">
+            </div>
+            <button onclick="callSendFileByUrl()">Отправить файл</button>
+        </div>
+
+        <!-- Поле вывода ответа -->
+        <div class="response">
+            <label for="responseBox">Ответ сервера (только для чтения):</label>
+            <textarea id="responseBox" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Базовый URL API
+        const API_BASE = 'https://api.green-api.com';
+
+        // Функция для получения idInstance и token из полей ввода
+        function getCredentials() {
+            const idInstance = document.getElementById('idInstance').value.trim();
+            const apiTokenInstance = document.getElementById('apiTokenInstance').value.trim();
+            if (!idInstance || !apiTokenInstance) {
+                displayResponse('Ошибка: введите idInstance и ApiTokenInstance');
+                return null;
+            }
+            return { idInstance, apiTokenInstance };
+        }
+
+        // Функция для отображения ответа в текстовом поле
+        function displayResponse(data) {
+            const responseBox = document.getElementById('responseBox');
+            if (typeof data === 'string') {
+                responseBox.value = data;
+            } else {
+                responseBox.value = JSON.stringify(data, null, 2);
+            }
+        }
+
+        // Универсальная функция для GET-запросов
+        async function callGetMethod(endpoint) {
+            const creds = getCredentials();
+            if (!creds) return;
+
+            const url = `${API_BASE}/waInstance${creds.idInstance}/${endpoint}/${creds.apiTokenInstance}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                displayResponse(data);
+            } catch (error) {
+                displayResponse(`Ошибка: ${error.message}`);
+            }
+        }
+
+        // Универсальная функция для POST-запросов
+        async function callPostMethod(endpoint, body) {
+            const creds = getCredentials();
+            if (!creds) return;
+
+            const url = `${API_BASE}/waInstance${creds.idInstance}/${endpoint}/${creds.apiTokenInstance}`;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+                displayResponse(data);
+            } catch (error) {
+                displayResponse(`Ошибка: ${error.message}`);
+            }
+        }
+
+        // Метод getSettings
+        function callGetSettings() {
+            callGetMethod('getSettings');
+        }
+
+        // Метод getStateInstance
+        function callGetStateInstance() {
+            callGetMethod('getStateInstance');
+        }
+
+        // Метод sendMessage
+        function callSendMessage() {
+            const phone = document.getElementById('phoneMessage').value.trim();
+            const message = document.getElementById('messageText').value.trim();
+            if (!phone || !message) {
+                displayResponse('Ошибка: заполните номер телефона и текст сообщения');
+                return;
+            }
+            // Проверка формата номера (должен оканчиваться на @c.us)
+            const chatId = phone.includes('@c.us') ? phone : phone + '@c.us';
+            const body = { chatId, message };
+            callPostMethod('sendMessage', body);
+        }
+
+        // Метод sendFileByUrl
+        function callSendFileByUrl() {
+            const phone = document.getElementById('phoneFile').value.trim();
+            const urlFile = document.getElementById('fileUrl').value.trim();
+            const fileName = document.getElementById('fileName').value.trim();
+            if (!phone || !urlFile || !fileName) {
+                displayResponse('Ошибка: заполните номер телефона, URL файла и имя файла');
+                return;
+            }
+            const chatId = phone.includes('@c.us') ? phone : phone + '@c.us';
+            const body = { chatId, urlFile, fileName };
+            callPostMethod('sendFileByUrl', body);
+        }
+    </script>
+</body>
+</html>
